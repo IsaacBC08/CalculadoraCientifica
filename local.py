@@ -1,4 +1,7 @@
 radianes = False
+musica = True
+Fx = True
+theme = "dark"
 def fac(n): 
     if n >= 1000000000000:
         return "El número es demasiado grande"
