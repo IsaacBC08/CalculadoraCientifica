@@ -14,26 +14,26 @@ equal = ["#02733E", "#023535f", "#038C4C"]
 c = ["#BF0F0F", "#BF5315", "#F20519"]
 delete = ["#fa5e1f", "#ff7e33", "#fa5e1f"]
 radian = ["#2D3E40", "#387373", "#97A6A0"]
+options = ["#202022", "#878787", "#CACACA"]
 btn_w = 80
 btn_h = 70
 pg.mixer.init()
 click = pg.mixer.Sound('assets/click.mp3')
-
-# pg.mixer.music.load('assets/main.mp3')
-# pg.mixer.music.play(-1)
 def main(page : ft.Page):
     pg.mixer.music.load('assets/main.mp3')
     pg.mixer.music.play(-1)
-    page.window_height = 620
+    page.window_height = 650
     page.window_width = 680
     page.bgcolor = bg
     page.window_resizable = False
     page.window_maximizable = False
-    page.title = "Calculadora"
+    page.title = "Calculadora by Isaac"
 
     def tecla(e: ft.KeyboardEvent):
         k = e.key
         print(k)
+        if LOCAL.Fx:
+            click.play()
         if k == "Numpad 0" or k == "0":
             texto.value = texto.value + "0"
         if k == "Numpad 1" or k == "1":
@@ -70,17 +70,46 @@ def main(page : ft.Page):
             except Exception as e:
                 texto.value = "Error de Sintaxis"
         page.update()
-
     def grados_a_radianes(grados):
         return grados * tgnm.pi / 180
     def get_data(e):
-        click.play()
+        if LOCAL.Fx:
+            click.play()
         data = e.control.data
         if data == "=":
             try:
                 texto.value = str(eval(texto.value))
             except Exception as e:
                 texto.value = "Error de Sintaxis"
+        elif data == "music":
+            if LOCAL.musica:
+                pg.mixer.music.stop()
+                LOCAL.musica = False
+                music.color = ft.colors.RED
+            else:
+                pg.mixer.music.play(-1)
+                LOCAL.musica = True
+                music.color = ft.colors.WHITE
+        elif data == "fx":
+            if LOCAL.Fx:
+                sound.color = ft.colors.RED
+                LOCAL.Fx = False
+            else: 
+                sound.color = ft.colors.WHITE
+                LOCAL.Fx = True
+        elif data == "theme":
+            if LOCAL.theme == "dark":
+                theme.text = "☾"
+                theme.color = ft.colors.WHITE
+                page.bgcolor = "#ffffff"
+                texto.bgcolor = "#8b8b8b"
+                LOCAL.theme = "light"
+            else:
+                theme.text = "☼"
+                theme.color = ft.colors.YELLOW
+                page.bgcolor = "#000000"
+                texto.bgcolor = bgtxt
+                LOCAL.theme = "dark"
         elif data == "AC":
             texto.value = ""
         elif data == "C":
@@ -98,7 +127,6 @@ def main(page : ft.Page):
         elif data == "sin":
             try:
                 if not LOCAL.radianes:
-                    print(LOCAL.radianes)
                     angulo_radianes = grados_a_radianes(float(texto.value))
                     num = texto.value
                     sen = tgnm.sin(angulo_radianes)
@@ -223,14 +251,38 @@ def main(page : ft.Page):
                 texto.value = sci.replace('e', '').replace('+', '^')
             except Exception as e:
                 texto.value = "Error de Sintaxis"
+        elif data == "1/2":
+            texto.value = float(texto.value) / 2
         elif data in ["[", "]", "0.5","1.618","2.718281828","1", "2","3","4","5", "6", "7", "8", "9", "0", "+", "-", "*", "/", "%", "(", ")", "3.141592653", "//", "**"]:
             texto.value += data
         page.update()
     
     page.on_keyboard_event = tecla
+    music = ft.ElevatedButton(text = "♫",width=60,height=30,
+                              bgcolor = options[0],
+                              color = ft.colors.WHITE,
+                              style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(), padding = 14,
+                                                   shadow_color=options[1],side=ft.BorderSide(width=2, color=options[2])),
+                                                   elevation=5, data="music",
+                                                   on_click=get_data)
+    sound = ft.ElevatedButton(text = "Fx",width=60,height=30,
+                              bgcolor = options[0],
+                              color = ft.colors.WHITE,
+                              style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(), padding = 14,
+                                                   shadow_color=options[1],side=ft.BorderSide(width=2, color=options[2])),
+                                                   elevation=5, data="fx",
+                                                   on_click=get_data)     
+    theme = ft.ElevatedButton(text = "☼",width=60,height=30,
+                              bgcolor = options[0],
+                              color = ft.colors.YELLOW,
+                              style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(), padding = 14,
+                                                   shadow_color=options[1],side=ft.BorderSide(width=2, color=options[2])),
+                                                   elevation=5, data="theme",
+                                                   on_click=get_data)     
     texto = ft.TextField(read_only=True, bgcolor=bgtxt,border_color=ft.colors.WHITE,text_align="right",
                         text_style=ft.TextStyle(size=30, color ="white"))
-    page.add(texto)
+    page.add(ft.Row([music, sound, theme], alignment=ft.MainAxisAlignment.START), texto)
+    
     medida = ft.ElevatedButton(text = "Deg", height=btn_h, width=btn_w,
                               bgcolor = c_ari[0],
                               color = ft.colors.WHITE,
@@ -542,7 +594,7 @@ def main(page : ft.Page):
                               color = ft.colors.WHITE,
                               style=ft.ButtonStyle(shape=ft.CircleBorder(), padding = 14,
                                                    shadow_color=c_ari[1],side=ft.BorderSide(width=2, color=c_ari[2])),
-                                                   elevation=5, data="0.5",
+                                                   elevation=5, data="1/2",
                                                    on_click=get_data),
             ft.ElevatedButton(text = "[",width=btn_w,height=btn_h, 
                               bgcolor = c_ari[0],
